@@ -2,10 +2,9 @@
 // HDJV WMS - Service Worker  (cache-first shell + push notifications)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const SW_VERSION  = 'wms-sw-v2';
+const SW_VERSION  = 'wms-sw-v3';
 const SHELL_CACHE = `wms-shell-${SW_VERSION}`;
 
-// App shell assets to cache on install
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -19,15 +18,14 @@ const SHELL_ASSETS = [
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 
-// ── Install: cache the app shell ──
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(SHELL_CACHE).then(cache => cache.addAll(SHELL_ASSETS))
+    caches.open(SHELL_CACHE)
+      .then(cache => cache.addAll(SHELL_ASSETS))
       .then(() => self.skipWaiting())
   );
 });
 
-// ── Activate: remove old caches ──
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -36,11 +34,9 @@ self.addEventListener('activate', event => {
   );
 });
 
-// ── Fetch: cache-first for shell assets, network-first for API calls ──
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Always go network-first for Google Apps Script API calls
   if (url.hostname.includes('script.google.com') ||
       url.hostname.includes('accounts.google.com')) {
     event.respondWith(
@@ -53,12 +49,10 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Cache-first for everything else (shell assets, fonts, CDN libs)
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
       return fetch(event.request).then(response => {
-        // Only cache successful same-origin or CDN responses
         if (!response || response.status !== 200 || response.type === 'error') {
           return response;
         }
@@ -66,7 +60,6 @@ self.addEventListener('fetch', event => {
         caches.open(SHELL_CACHE).then(cache => cache.put(event.request, clone));
         return response;
       }).catch(() => {
-        // Offline fallback for navigation requests
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
@@ -75,7 +68,6 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// ── Push: show notification ──
 self.addEventListener('push', event => {
   let data = { title: 'WMS Notification', body: 'You have a new notification', type: 'general' };
   if (event.data) {
@@ -98,7 +90,6 @@ self.addEventListener('push', event => {
   );
 });
 
-// ── Notification click ──
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   if (event.action === 'dismiss') return;
@@ -116,7 +107,6 @@ self.addEventListener('notificationclick', event => {
   );
 });
 
-// ── Message handler ──
 self.addEventListener('message', event => {
   if (event.data?.type === 'SHOW_NOTIFICATION') {
     const { title, body, tag, notifType } = event.data;
@@ -132,7 +122,6 @@ self.addEventListener('message', event => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
-// ── Background sync ──
 self.addEventListener('sync', event => {
   if (event.tag === 'check-pending-users') {
     // Sync handled in main thread via polling
