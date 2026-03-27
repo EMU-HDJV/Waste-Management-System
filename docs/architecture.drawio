@@ -68,7 +68,7 @@
         </mxCell>
 
         <!-- Waste Log Form -->
-        <mxCell id="c-form" value="📝 Waste Log Form&#xa;&#xa;Hazardous: date, volume (L), waste name, photo&#xa;Solid: date, dump location, waste name, photo&#xa;&#xa;• Canvas watermark on photo (email + pkg + time)&#xa;• Fingerprint dedup check before POST&#xa;• Submit → POST to Apps Script" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+        <mxCell id="c-form" value="📝 Waste Log Form&#xa;&#xa;Hazardous: date, volume (L), waste name, photo&#xa;Solid: date, dump location, waste name, photo&#xa;&#xa;• GPS stamp via Geolocation API (lat/lng on photo)&#xa;• Canvas watermark on photo (email + pkg + time + coords)&#xa;• Fingerprint dedup check before POST&#xa;• Submit → POST to Apps Script" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
           <mxGeometry x="60" y="530" width="300" height="130" as="geometry" />
         </mxCell>
 
@@ -92,7 +92,7 @@
         <!-- ═══════════════════════════════════════════════ -->
 
         <!-- Router -->
-        <mxCell id="b-router" value="🔀 Request Router&#xa;(doGet / doPost)&#xa;&#xa;Dispatches by action= parameter:&#xa;• No action + email → login&#xa;• validateToken / refreshToken / logout&#xa;• getUsers / approveUser / rejectUser&#xa;• updateUserStatus / updateUserRole / deleteUser&#xa;• getRequests / checkUserSheet&#xa;• getImageBase64&#xa;• package= → fetch records&#xa;• POST body → log waste entry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+        <mxCell id="b-router" value="🔀 Request Router&#xa;(doGet / doPost)&#xa;&#xa;Dispatches by action= parameter:&#xa;• No action + email → login&#xa;• validateToken / refreshToken / logout&#xa;• getUsers / approveUser / rejectUser&#xa;• updateUserStatus / updateUserRole / deleteUser&#xa;• getRequests / checkUserSheet&#xa;• getImageBase64&#xa;• editEntry / deleteEntry → update or remove row&#xa;• package= → fetch records&#xa;• POST body → log waste entry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
           <mxGeometry x="450" y="120" width="320" height="210" as="geometry" />
         </mxCell>
 
@@ -112,7 +112,7 @@
         </mxCell>
 
         <!-- Data Layer -->
-        <mxCell id="b-data" value="📊 Data Layer&#xa;&#xa;fetchEntries(pkg, user, from, to, wasteType)&#xa;  → selects PACKAGE_MAP or SOLID_PACKAGE_MAP&#xa;  → opens correct sheet&#xa;  → filters by package + date range&#xa;  → returns [headers, ...rows]&#xa;&#xa;doPost → validates fields → uploads photo&#xa;  → appends row with timestamp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+        <mxCell id="b-data" value="📊 Data Layer&#xa;&#xa;fetchEntries(pkg, user, from, to, wasteType)&#xa;  → selects PACKAGE_MAP or SOLID_PACKAGE_MAP&#xa;  → opens correct sheet&#xa;  → filters by package + date range&#xa;  → returns [headers, ...rows]&#xa;&#xa;editEntry(pkg, wasteType, rowIndex, fields)&#xa;  → updates row in-place on sheet&#xa;&#xa;deleteEntry(pkg, wasteType, rowIndex)&#xa;  → removes row from sheet&#xa;&#xa;doPost → validates fields → uploads photo&#xa;  → appends row with timestamp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
           <mxGeometry x="450" y="880" width="320" height="170" as="geometry" />
         </mxCell>
 
@@ -252,12 +252,12 @@
         </mxCell>
 
         <!-- Data → Hazardous Sheets -->
-        <mxCell id="e14" value="R/W waste rows" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;fontColor=#7d4f00;fontSize=10;" edge="1" source="b-data" target="s-hazsheets" parent="1">
+        <mxCell id="e14" value="R/W/Delete waste rows" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;fontColor=#7d4f00;fontSize=10;" edge="1" source="b-data" target="s-hazsheets" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
         <!-- Data → Solid Sheets -->
-        <mxCell id="e15" value="R/W waste rows" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;fontColor=#7d4f00;fontSize=10;" edge="1" source="b-data" target="s-solidsheets" parent="1">
+        <mxCell id="e15" value="R/W/Delete waste rows" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;fontColor=#7d4f00;fontSize=10;" edge="1" source="b-data" target="s-solidsheets" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
